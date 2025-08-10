@@ -76,6 +76,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -106,43 +107,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         ),
         child: Stack(
           children: [
-            // Subtle circular patterns in background
-            Positioned(
-              top: 50,
-              right: 30,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.1),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 150,
-              left: 20,
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.08),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 100,
-              right: 50,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.06),
-                ),
-              ),
-            ),
             // Main content
             Consumer<LevelProvider>(
               builder: (context, levelProvider, child) {
@@ -197,21 +161,11 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   /// Calculate total grid items needed for enhanced snake layout
   /// Accounts for special levels (multiples of 5) that get their own positions
   int _calculateTotalGridItems(int totalLevels) {
-    // Generate the level sequence to see how many positions we need
-    List<int> levelSequence = _generateLevelSequence();
+    // Generate the level sequence with the required number of levels
+    List<int> levelSequence = _generateLevelSequence(totalLevels);
     
-    // Find how many positions we need for the total levels
-    int positionsNeeded = 0;
-    for (int i = 0; i < levelSequence.length; i++) {
-      if (levelSequence[i] <= totalLevels) {
-        positionsNeeded = i + 1;
-      } else {
-        break;
-      }
-    }
-    
-    // Add one more position for "Coming Soon" tile
-    return positionsNeeded + 1;
+    // Return the sequence length plus one for "Coming Soon" tile
+    return levelSequence.length + 1;
   }
   
   /// Build individual grid item with enhanced snake layout
@@ -220,8 +174,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     final row = index ~/ crossAxisCount;
     final col = index % crossAxisCount;
     
-    // Get the level sequence
-    List<int> levelSequence = _generateLevelSequence();
+    // Get the level sequence with the required number of levels
+    List<int> levelSequence = _generateLevelSequence(levelProvider.totalLevels);
     
     // Calculate the index in the sequence
     int sequenceIndex = row * crossAxisCount + col;
@@ -258,12 +212,15 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   
   /// Generate the level sequence with special handling for multiples of 5
   /// Dynamic algorithm that works for any number of levels
-  List<int> _generateLevelSequence() {
+  List<int> _generateLevelSequence(int totalLevels) {
     List<int> sequence = [];
     int currentLevel = 1;
     int regularRowCount = 0; // Track regular rows (excluding special level rows)
     
-    while (currentLevel <= 1000) { // Support up to 1000 levels
+    // Calculate how many levels we need to generate (add buffer for special levels)
+    int maxLevelsToGenerate = totalLevels + 10; // Add buffer for special levels
+    
+    while (currentLevel <= maxLevelsToGenerate) {
       if (currentLevel % 5 == 0) {
         // Special level (multiple of 5) - alternate between end and beginning
         int specialLevelCount = (currentLevel / 5).round();
@@ -279,14 +236,14 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         // Regular group of 4 levels
         if (regularRowCount % 2 == 0) {
           // Even regular rows: left to right (1-4, 11-14, 21-24, 31-34, etc.)
-          for (int i = 0; i < 4 && currentLevel <= 1000; i++) {
+          for (int i = 0; i < 4 && currentLevel <= maxLevelsToGenerate; i++) {
             sequence.add(currentLevel);
             currentLevel++;
           }
         } else {
           // Odd regular rows: right to left (6-9, 16-19, 26-29, 36-39, etc.)
           List<int> tempLevels = [];
-          for (int i = 0; i < 4 && currentLevel <= 1000; i++) {
+          for (int i = 0; i < 4 && currentLevel <= maxLevelsToGenerate; i++) {
             tempLevels.add(currentLevel);
             currentLevel++;
           }
@@ -299,7 +256,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       }
     }
     
-    print('Fixed Sequence: ${sequence.take(40).toList()}');
+    print('Optimized Sequence: ${sequence.take(40).toList()}');
     return sequence;
   }
   

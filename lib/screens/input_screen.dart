@@ -137,9 +137,9 @@ class _InputScreenState extends State<InputScreen> {
                           if (number == null || number <= 0) {
                             return 'Please enter a valid positive number';
                           }
-                          if (number > 100) {
-                            return 'Maximum 100 levels allowed';
-                          }
+                          // if (number > 100) {
+                          //   return 'Maximum 100 levels allowed';
+                          // }
                           return null;
                         },
                       ),
@@ -222,7 +222,7 @@ class _InputScreenState extends State<InputScreen> {
       
       // Navigate to level selection screen
       if (mounted) {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const LevelSelectionScreen(),
